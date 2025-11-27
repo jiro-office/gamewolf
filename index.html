@@ -1,0 +1,54 @@
+<!-- ===== index.html ===== -->
+<script src="/socket.io/socket.io.js"></script>
+
+<h3>人狼プロトタイプ</h3>
+
+<button onclick="startGame()">ゲーム開始</button>
+<div id="role"></div>
+<div id="phase"></div>
+
+<h4>チャット</h4>
+<input id="msg">
+<button onclick="sendChat()">送信</button>
+<div id="log"></div>
+
+<h4>投票</h4>
+<input id="voteId" placeholder="相手のIDを入力">
+<button onclick="sendVote()">投票</button>
+
+<script>
+let socket = io();
+
+// --- イベント受信 ---
+socket.on("role", r => {
+  document.getElementById("role").innerText = "あなたの役職: " + r;
+});
+
+socket.on("phase", p => {
+  document.getElementById("phase").innerText = "フェーズ: " + p;
+});
+
+socket.on("chat", data => {
+  document.getElementById("log").innerHTML +=
+    `<div>${data.id}: ${data.msg}</div>`;
+});
+
+socket.on("result", t => {
+  alert("処刑されたプレイヤー: " + t);
+});
+
+// --- ボタン関数 ---
+function startGame() {
+  socket.emit("start");
+}
+
+function sendChat() {
+  const msg = document.getElementById("msg").value;
+  socket.emit("chat", msg);
+}
+
+function sendVote() {
+  const target = document.getElementById("voteId").value;
+  socket.emit("vote", target);
+}
+</script>
